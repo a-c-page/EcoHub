@@ -27,8 +27,7 @@ const LoginScreen = ({ navigation }) => {
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUserID(user.uid);
-                console.log("tete");
-                console.log(user.uid);
+                console.log("Logged in with UID: " + user.uid);
                 navigation.navigate("Start");
             }
         });

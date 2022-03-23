@@ -16,7 +16,17 @@ import {
 import { Icon } from "react-native-elements";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { Table, Row, Rows } from "react-native-table-component";
-import { db, firebase } from "../../firebase";
+import { app } from "../../firebase";
+import {
+    collection,
+    doc,
+    setDoc,
+    getDoc,
+    getFirestore,
+    query,
+    where,
+    getDocs,
+} from "firebase/firestore";
 import { StateContext } from "../StateProvider";
 
 // Helper function to get the current date
@@ -38,6 +48,7 @@ const DietMenu = ({ navigation }) => {
     const [currDate, setCurrDate] = useState(new Date());
     const [dateString, setDateString] = useState(getCurrentDate());
     const [items, setItems] = useState([]);
+    const db = getFirestore(app);
 
     const showDatePicker = () => {
         setDatePickerVisibility(true);
@@ -97,64 +108,69 @@ const DietMenu = ({ navigation }) => {
         hideDatePicker();
     };
 
-    useEffect(() => {
-        var docRef = db.collection("totals").doc(userID).collection("data");
+    useEffect(async () => {
+        const querySnapshot = await getDocs(
+            collection(doc(db, "totals", userID), "data")
+        );
 
-        docRef.get().then((querySnapshot) => {
-            let data = [];
-            querySnapshot.forEach((doc) => {
-                // doc.data() is never undefined for query doc snapshots
-                let tempData = doc.data();
-                let temp = {
-                    x: doc.id,
-                    y:
-                        (tempData["totalBreakfast"]
+        let data = [];
+        querySnapshot.forEach((doc) => {
+            let tempData = doc.data();
+            let temp = {
+                x: doc.id,
+                y:
+                    parseInt(
+                        tempData["totalBreakfast"]
                             ? tempData["totalBreakfast"]
-                            : 0) +
-                        (tempData["totalLunch"] ? tempData["totalLunch"] : 0) +
-                        (tempData["totalDinner"] ? tempData["totalDinner"] : 0),
-                };
-                data.push(temp);
-            });
+                            : 0
+                    ) +
+                    parseInt(
+                        tempData["totalLunch"] ? tempData["totalLunch"] : 0
+                    ) +
+                    parseInt(
+                        tempData["totalDinner"] ? tempData["totalDinner"] : 0
+                    ),
+            };
+            data.push(temp);
             setGraphData(data);
             setShow(true);
         });
 
-        let result = getCurrentDate();
-        docRef
-            .doc(result)
-            .get()
-            .then((doc) => {
-                if (doc.exists) {
-                    let arr = doc.data();
-                    let test = [
-                        ["Breakfast", "-"],
-                        ["Lunch", "-"],
-                        ["Dinner", "-"],
-                    ];
-                    var result = Object.keys(arr).map((key) => {
-                        if (key.substring(5) === "Breakfast") {
-                            test[0][1] = arr[key] == 0 ? "-" : arr[key];
-                        } else if (key.substring(5) === "Lunch") {
-                            test[1][1] = arr[key] == 0 ? "-" : arr[key];
-                        } else if (key.substring(5) === "Dinner") {
-                            test[2][1] = arr[key] == 0 ? "-" : arr[key];
-                        }
-                    });
-                    setItems(test);
-                } else {
-                    let test = [
-                        ["Breakfast", "-"],
-                        ["Lunch", "-"],
-                        ["Dinner", "-"],
-                    ];
-                    // doc.data() will be undefined in this case
-                    setItems(test);
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
+        // let result = getCurrentDate();
+        // docRef
+        //     .doc(result)
+        //     .get()
+        //     .then((doc) => {
+        //         if (doc.exists) {
+        //             let arr = doc.data();
+        //             let test = [
+        //                 ["Breakfast", "-"],
+        //                 ["Lunch", "-"],
+        //                 ["Dinner", "-"],
+        //             ];
+        //             var result = Object.keys(arr).map((key) => {
+        //                 if (key.substring(5) === "Breakfast") {
+        //                     test[0][1] = arr[key] == 0 ? "-" : arr[key];
+        //                 } else if (key.substring(5) === "Lunch") {
+        //                     test[1][1] = arr[key] == 0 ? "-" : arr[key];
+        //                 } else if (key.substring(5) === "Dinner") {
+        //                     test[2][1] = arr[key] == 0 ? "-" : arr[key];
+        //                 }
+        //             });
+        //             setItems(test);
+        //         } else {
+        //             let test = [
+        //                 ["Breakfast", "-"],
+        //                 ["Lunch", "-"],
+        //                 ["Dinner", "-"],
+        //             ];
+        //             // doc.data() will be undefined in this case
+        //             setItems(test);
+        //         }
+        //     })
+        //     .catch((error) => {
+        //         console.log("Error getting document:", error);
+        //     });
     }, []);
     return (
         <>
@@ -208,7 +224,7 @@ const DietMenu = ({ navigation }) => {
                     <Text
                         style={{
                             fontWeight: "bold",
-                            fontSize: "20",
+                            fontSize: 20,
                             color: "white",
                         }}
                     >

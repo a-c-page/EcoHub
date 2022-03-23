@@ -1,6 +1,7 @@
 {
   "expo": {
     "name": "ecohub",
+    "userInterfaceStyle": "automatic",
     "slug": "ecohub",
     "version": "1.0.0",
     "orientation": "portrait",

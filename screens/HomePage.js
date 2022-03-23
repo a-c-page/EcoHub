@@ -39,11 +39,13 @@ const HomeDisplay = ({ navigation }) => {
             }}
         >
             <ImageBackground
-                source={require("../assets/banner.jpg")}
                 resizeMode="cover"
                 style={{
+                    marginTop: 0,
                     flex: 0.75,
                     alignItems: "center",
+                    backgroundColor: "#104418",
+                    paddingBottom: 200,
                 }}
             >
                 <Image
@@ -52,7 +54,7 @@ const HomeDisplay = ({ navigation }) => {
                         resizeMode: "cover",
                         width: 300,
                         height: 250,
-                        marginTop: 10,
+                        marginTop: 30,
                     }}
                 ></Image>
             </ImageBackground>
