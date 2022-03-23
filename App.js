@@ -1,82 +1,26 @@
 import { NavigationContainer } from "@react-navigation/native";
-import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { StateProvider } from "./screens/StateProvider";
-import BottomTabNode from "./screens/BottomTabNode";
-import HomePage from "./screens/HomePage";
-import Devices from "./screens/Devices";
-import Settings from "./screens/Settings";
-import Suggestions from "./screens/Suggestions";
+import { createNativeStackNavigator } from "@react-navigation/native-stack";
+import Start from "./screens/Start";
+import LoginScreen from "./screens/LoginScreen";
 
-const Stack = createBottomTabNavigator();
+const Stack = createNativeStackNavigator();
 
 export default function App() {
     return (
         <StateProvider>
             <NavigationContainer>
-                <Stack.Navigator
-                    screenOptions={{
-                        tabBarShowLabel: false,
-                        tabBarStyle: {
-                            backgroundColor: "#ffffff",
-                            height: 80,
-                            paddingBottom: 20,
-                        },
-                    }}
-                >
+                <Stack.Navigator>
                     <Stack.Screen
-                        name="Home"
-                        component={HomePage}
-                        options={{
-                            tabBarIcon: ({ focused }) => (
-                                <BottomTabNode
-                                    imagePath={require("./assets/home.png")}
-                                    tabText="HOME"
-                                    focused={focused}
-                                ></BottomTabNode>
-                            ),
-                            headerShown: false,
-                        }}
-                    />
+                        name="Login"
+                        component={LoginScreen}
+                        options={{ headerShown: false, gestureEnabled: false }}
+                    ></Stack.Screen>
                     <Stack.Screen
-                        name="Connected Devices"
-                        component={Devices}
-                        options={{
-                            tabBarIcon: ({ focused }) => (
-                                <BottomTabNode
-                                    imagePath={require("./assets/light.png")}
-                                    tabText="DEVICES"
-                                    focused={focused}
-                                ></BottomTabNode>
-                            ),
-                        }}
-                    />
-
-                    <Stack.Screen
-                        name="Suggestions"
-                        component={Suggestions}
-                        options={{
-                            tabBarIcon: ({ focused }) => (
-                                <BottomTabNode
-                                    imagePath={require("./assets/suggestion.png")}
-                                    tabText="SUGGESTIONS"
-                                    focused={focused}
-                                ></BottomTabNode>
-                            ),
-                        }}
-                    />
-                    <Stack.Screen
-                        name="Settings"
-                        component={Settings}
-                        options={{
-                            tabBarIcon: ({ focused }) => (
-                                <BottomTabNode
-                                    imagePath={require("./assets/settings.png")}
-                                    tabText="SETTINGS"
-                                    focused={focused}
-                                ></BottomTabNode>
-                            ),
-                        }}
-                    />
+                        name="Start"
+                        component={Start}
+                        options={{ headerShown: false, gestureEnabled: false }}
+                    ></Stack.Screen>
                 </Stack.Navigator>
             </NavigationContainer>
         </StateProvider>
