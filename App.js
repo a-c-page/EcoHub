@@ -6,7 +6,11 @@ import LoginScreen from "./screens/LoginScreen";
 import { LogBox } from "react-native";
 
 const Stack = createNativeStackNavigator();
-LogBox.ignoreLogs(["AsyncStorage has been extracted from react-na"]);
+LogBox.ignoreLogs([
+    "AsyncStorage has been extracted from react-na",
+    "Warning: Each child in a list should have a unique",
+    "Setting a timer for a long period of time",
+]);
 
 export default function App() {
     return (

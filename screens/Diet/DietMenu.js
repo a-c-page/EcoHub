@@ -1,43 +1,33 @@
-import React, { PureComponent, useEffect, useContext, useState } from "react";
+import { useEffect, useContext, useState } from "react";
 import {
     VictoryChart,
     VictoryGroup,
     VictoryBar,
     VictoryLegend,
 } from "victory-native";
-import {
-    View,
-    Text,
-    TouchableOpacity,
-    StyleSheet,
-    Dimensions,
-    Button,
-} from "react-native";
+import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
 import { Icon } from "react-native-elements";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
-import { Table, Row, Rows } from "react-native-table-component";
 import { app } from "../../firebase";
 import {
     collection,
     doc,
-    setDoc,
-    getDoc,
     getFirestore,
-    query,
-    where,
+    getDoc,
+    setDoc,
     getDocs,
 } from "firebase/firestore";
 import { StateContext } from "../StateProvider";
 
-// Helper function to get the current date
-const getCurrentDate = () => {
-    var date = new Date().getDate();
-    var month = new Date().getMonth() + 1;
-    var year = new Date().getFullYear();
+const getDateString = (date) => {
+    var day = date.getDate();
+    var month = date.getMonth() + 1;
+    if (month < 10) {
+        month = "0" + month;
+    }
+    var year = date.getFullYear();
 
-    //Alert.alert(date + '-' + month + '-' + year);
-    // You can turn it in to your desired format
-    return date + "-" + month + "-" + year; //format: dd-mm-yyyy;
+    return year + "-" + month + "-" + day;
 };
 
 const DietMenu = ({ navigation }) => {
@@ -46,8 +36,8 @@ const DietMenu = ({ navigation }) => {
     const [show, setShow] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [currDate, setCurrDate] = useState(new Date());
-    const [dateString, setDateString] = useState(getCurrentDate());
     const [items, setItems] = useState([]);
+    const [dateString, setDateString] = useState();
     const db = getFirestore(app);
 
     const showDatePicker = () => {
@@ -58,87 +48,23 @@ const DietMenu = ({ navigation }) => {
         setDatePickerVisibility(false);
     };
 
-    const handleConfirm = (date) => {
-        let month = date.getMonth() + 1;
-        let year = date.getFullYear();
-        let dateT = date.getDate();
-        let result = dateT + "-" + month + "-" + year;
-        setDateString(result);
+    const handleConfirm = async (date) => {
+        var conversion = getDateString(date);
+        setDateString(conversion);
+        const dayDocRef = doc(db, `userInfo/${userID}/dietTotals`, conversion);
+        const dayDocSnap = await getDoc(dayDocRef);
 
-        var docRef = db
-            .collection("totals")
-            .doc(userID)
-            .collection("data")
-            .doc(result);
-        docRef
-            .get()
-            .then((doc) => {
-                if (doc.exists) {
-                    let arr = doc.data();
-                    let test = [
-                        ["Breakfast", "-"],
-                        ["Lunch", "-"],
-                        ["Dinner", "-"],
-                    ];
-                    var result = Object.keys(arr).map((key) => {
-                        if (key.substring(5) === "Breakfast") {
-                            test[0][1] = arr[key] == 0 ? "-" : arr[key];
-                        } else if (key.substring(5) === "Lunch") {
-                            test[1][1] = arr[key] == 0 ? "-" : arr[key];
-                        } else if (key.substring(5) === "Dinner") {
-                            test[2][1] = arr[key] == 0 ? "-" : arr[key];
-                        }
-                    });
-                    setItems(test);
-                } else {
-                    let test = [
-                        ["Breakfast", "-"],
-                        ["Lunch", "-"],
-                        ["Dinner", "-"],
-                    ];
-                    // doc.data() will be undefined in this case
-                    setItems(test);
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
+        // SEE IF DATE IS IN DB
+        if (!dayDocSnap.exists()) {
+            await setDoc(dayDocRef, { total: 0 });
+        }
 
-        setCurrDate(date);
-        hideDatePicker();
-    };
-
-    useEffect(async () => {
-        const querySnapshot = await getDocs(
-            collection(doc(db, "totals", userID), "data")
-        );
-
-        let data = [];
-        querySnapshot.forEach((doc) => {
-            let tempData = doc.data();
-            let temp = {
-                x: doc.id,
-                y:
-                    parseInt(
-                        tempData["totalBreakfast"]
-                            ? tempData["totalBreakfast"]
-                            : 0
-                    ) +
-                    parseInt(
-                        tempData["totalLunch"] ? tempData["totalLunch"] : 0
-                    ) +
-                    parseInt(
-                        tempData["totalDinner"] ? tempData["totalDinner"] : 0
-                    ),
-            };
-            data.push(temp);
-            setGraphData(data);
-            setShow(true);
-        });
-
-        // let result = getCurrentDate();
+        // var docRef = db
+        //     .collection("totals")
+        //     .doc(userID)
+        //     .collection("data")
+        //     .doc(result);
         // docRef
-        //     .doc(result)
         //     .get()
         //     .then((doc) => {
         //         if (doc.exists) {
@@ -164,19 +90,65 @@ const DietMenu = ({ navigation }) => {
         //                 ["Lunch", "-"],
         //                 ["Dinner", "-"],
         //             ];
-        //             // doc.data() will be undefined in this case
         //             setItems(test);
         //         }
         //     })
         //     .catch((error) => {
         //         console.log("Error getting document:", error);
         //     });
+
+        setCurrDate(date);
+        hideDatePicker();
+    };
+
+    useEffect(async () => {
+        const todayDate = getDateString(currDate);
+        setDateString(todayDate);
+        const accountDocRef = doc(db, "userInfo", userID);
+        const accountDocSnap = await getDoc(accountDocRef);
+
+        // SEE IF ACCOUNT EXISTS IN DB
+        if (!accountDocSnap.exists()) {
+            await setDoc(accountDocRef, {});
+        }
+
+        const dayDocRef = doc(db, `userInfo/${userID}/dietTotals`, todayDate);
+        const dayDocSnap = await getDoc(dayDocRef);
+
+        // SEE IF TODAY IS IN DB
+        if (!dayDocSnap.exists()) {
+            await setDoc(dayDocRef, { total: 0 });
+        }
+
+        // POPULATING GRAPH
+        const querySnapshot = await getDocs(
+            collection(db, `userInfo/${userID}`, "dietTotals")
+        );
+        let data = [];
+        querySnapshot.forEach((doc) => {
+            let docData = doc.data();
+            let docObject = {
+                x: doc.id,
+                y: parseInt(docData["total"] ? docData["total"] : 0),
+            };
+            data.push(docObject);
+        });
+        setGraphData(data);
+        setShow(true);
+
+        let test = [
+            ["Breakfast", "-"],
+            ["Lunch", "-"],
+            ["Dinner", "-"],
+        ];
+        setItems(test);
     }, []);
+
     return (
         <>
-            <View style={{ flex: 1, marginTop: 50, alignItems: "center" }}>
+            <View style={{ flex: 1, alignItems: "center" }}>
                 <Text style={styles.title}>Past Week</Text>
-                <View style={{ marginBottom: 30 }}>
+                <View>
                     {show ? (
                         <VictoryChart width={350} domainPadding={{ x: 20 }}>
                             <VictoryGroup offset={0}>
@@ -235,14 +207,12 @@ const DietMenu = ({ navigation }) => {
                     <Text style={styles.row1}> Diet </Text>
                     <Text style={styles.row1}> CO2 Emission / g </Text>
                 </View>
-                {items.map((item) =>
-                    item[0] != "Transportation" ? (
-                        <View style={styles.wrapper}>
-                            <Text style={styles.row2}> {item[0]} </Text>
-                            <Text style={styles.row3}> {item[1]} </Text>
-                        </View>
-                    ) : null
-                )}
+                {items.map((item) => (
+                    <View style={styles.wrapper}>
+                        <Text style={styles.row2}> {item[0]} </Text>
+                        <Text style={styles.row3}> {item[1]} </Text>
+                    </View>
+                ))}
             </View>
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -253,7 +223,9 @@ const DietMenu = ({ navigation }) => {
             />
             <TouchableOpacity
                 style={styles.floatingActionButton}
-                onPress={() => navigation.navigate("DietSubmit")}
+                onPress={() =>
+                    navigation.navigate("Food", { currDate: dateString })
+                }
             >
                 <Icon name="add" color="white" />
             </TouchableOpacity>
@@ -279,11 +251,11 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        marginTop: 18,
+        marginTop: 20,
         fontSize: 20,
         alignSelf: "center",
         fontWeight: "bold",
-        marginBottom: 20,
+        marginBottom: 10,
     },
 
     floatingActionButton: {
@@ -291,7 +263,7 @@ const styles = StyleSheet.create({
         width: 55,
         height: 55,
         position: "absolute",
-        bottom: 25,
+        bottom: 10,
         right: 10,
         borderRadius: 100,
         justifyContent: "center",

@@ -11,32 +11,18 @@ import { Overlay, Icon } from "react-native-elements";
 import DropDownPicker from "react-native-dropdown-picker";
 import { Table, Row, Rows } from "react-native-table-component";
 import { StateContext } from "../StateProvider";
-import { db, firebase } from "../../firebase";
-
-// Helper function to get the current date
-const getCurrentDate = () => {
-    var date = new Date().getDate();
-    var month = new Date().getMonth() + 1;
-    var year = new Date().getFullYear();
-
-    //Alert.alert(date + '-' + month + '-' + year);
-    // You can turn it in to your desired format
-    return date + "-" + month + "-" + year; //format: dd-mm-yyyy;
-};
-
-// Helper function to remove Item
-const removeItem = (arr, val) => {
-    let len = arr.length;
-    let index;
-    for (let i = 0; i < len; i++) {
-        if (arr[i].value == val) {
-            console.log(arr[i].label);
-            index = i;
-        }
-    }
-    arr.splice(index, 1);
-    return arr;
-};
+import { app } from "../../firebase";
+import {
+    collection,
+    doc,
+    getFirestore,
+    getDoc,
+    setDoc,
+    getDocs,
+    updateDoc,
+    deleteField,
+} from "firebase/firestore";
+import { async } from "@firebase/util";
 
 const remove = (arr, val) => {
     // Remove from the breakfastList
@@ -54,14 +40,14 @@ const remove = (arr, val) => {
     // Add back to the array
 };
 
-const Dinner = () => {
+const Food = ({ route, navigation }) => {
     const {
-        dinnerListItems,
-        setDinnerListItems,
+        foodItems,
+        setFoodItems,
         userID,
         dietAmount,
-        totalDinner,
-        setTotalDinner,
+        totalBreakfast,
+        setTotalBreakfast,
     } = useContext(StateContext);
     const [visible, setVisible] = useState(false);
     const [open, setOpen] = useState(false);
@@ -100,72 +86,58 @@ const Dinner = () => {
         { label: "Beer", value: "Beer" },
     ]);
     const [serving, setServing] = useState(0);
-
-    // Adding it to the database
-    let currDate = getCurrentDate();
-    let docRef = db
-        .collection("userDiet")
-        .doc(userID)
-        .collection("dinner")
-        .doc(currDate);
-    let totalRef = db
-        .collection("totals")
-        .doc(userID)
-        .collection("data")
-        .doc(currDate);
+    const db = getFirestore(app);
+    const { currDate } = route.params;
 
     const toggleOverlay = () => {
         setVisible(!visible);
     };
 
-    const addItem = () => {
+    const addItem = async () => {
         if (value != null && serving > 0) {
-            const item = {
+            let docData = {};
+            docData[value] = serving;
+
+            let test = {
                 type: value,
                 servings: serving,
             };
 
-            let docData = {};
-            docData[value] = serving;
+            const dayDocRef = doc(
+                db,
+                `userInfo/${userID}/dietTotals`,
+                currDate
+            );
+            await updateDoc(dayDocRef, docData);
 
-            docRef
-                .update(docData)
-                .then(() => {
-                    console.log("Document successfully written!");
-                })
-                .catch((error) => {
-                    docRef.set(docData);
-                    //console.error("Error writing document: ", error);
-                });
+            setFoodItems((foodItems) => [...foodItems, test]);
 
-            const itemRef = removeItem(items, value);
-            setDinnerListItems([...dinnerListItems, item]);
+            toggleOverlay();
             setServing(0);
             setValue(null);
-            setItems(itemRef);
             toggleOverlay();
 
-            let result = dietAmount[item.type] * item.servings;
-            console.log(result);
-            let len = dinnerListItems.length;
+            // let result = dietAmount[item.type] * item.servings;
+            // console.log(result);
+            // let len = breakfastListItems.length;
 
-            for (let i = 0; i < len; i++) {
-                let label = dinnerListItems[i].type;
-                let servings = dinnerListItems[i].servings;
-                result += dietAmount[label] * servings;
-            }
-            setTotalDinner(result);
+            // for (let i = 0; i < len; i++) {
+            //     let label = breakfastListItems[i].type;
+            //     let servings = breakfastListItems[i].servings;
+            //     result += dietAmount[label] * servings;
+            // }
+            // setTotalBreakfast(result);
 
-            let tempData = { totalDinner: result };
+            // let tempData = { totalBreakfast: result };
 
-            totalRef
-                .update(tempData)
-                .then(() => {
-                    console.log("Document successfully written!");
-                })
-                .catch((error) => {
-                    totalRef.set(tempData);
-                });
+            // totalRef
+            //     .update(tempData)
+            //     .then(() => {
+            //         console.log("Document successfully written!");
+            //     })
+            //     .catch((error) => {
+            //         totalRef.set(tempData);
+            //     });
         } else if (value == null) {
             alert("Please select an item");
         } else if (serving == 0) {
@@ -173,95 +145,66 @@ const Dinner = () => {
         }
     };
 
-    const handleDelete = (item) => {
-        let arr = remove(dinnerListItems, item.type);
-        setDinnerListItems(arr);
-
-        // Adding data to the thing
-        let itemsRef = items;
-        let data = { label: item.type, value: item.type };
-        itemsRef.push(data);
-        setItems(itemsRef);
+    const handleDelete = async (item) => {
+        let arr = remove(foodItems, item.type);
+        setFoodItems(arr);
 
         //Removing it from database
         let docData = {};
-        docData[item.type] = firebase.firestore.FieldValue.delete();
-        docRef.update(docData);
+        docData[item.type] = deleteField();
 
-        // Removing from the thing
-        let result = totalDinner;
-        result -= dietAmount[item.type] * item.servings;
-        setTotalDinner(result);
+        const dayDocRef = doc(db, `userInfo/${userID}/dietTotals`, currDate);
+        await updateDoc(dayDocRef, docData);
 
-        let tempData = { totalDinner: result };
+        // // Removing from the thing
+        // let result = totalBreakfast;
+        // result -= dietAmount[item.type] * item.servings;
+        // setTotalBreakfast(result);
 
-        totalRef
-            .update(tempData)
-            .then(() => {
-                console.log("Document successfully written!");
-            })
-            .catch((error) => {
-                totalRef.set(tempData);
-                //console.error("Error writing document: ", error);
-            });
+        // let tempData = { totalBreakfast: result };
+
+        // totalRef
+        //     .update(tempData)
+        //     .then(() => {
+        //         console.log("Document successfully written!");
+        //     })
+        //     .catch((error) => {
+        //         totalRef.set(tempData);
+        //         //console.error("Error writing document: ", error);
+        //     });
     };
 
-    useEffect(() => {
-        docRef
-            .get()
-            .then((doc) => {
-                if (doc.exists) {
-                    const arr = doc.data();
-                    const keys = Object.keys(arr);
+    useEffect(async () => {
+        const dayDocRef = doc(db, `userInfo/${userID}/dietTotals`, currDate);
+        const dayDocSnap = await getDoc(dayDocRef);
+        // SEE IF TODAY IS IN DB
+        if (!dayDocSnap.exists()) {
+            await setDoc(dayDocRef, { total: 0 });
+        }
 
-                    if (keys != 0) {
-                        let result = [];
-                        let itemRef;
+        let info = await getDoc(dayDocRef);
+        let infoData = info.data();
 
-                        keys.forEach((key) => {
-                            const item = {
-                                type: key,
-                                servings: arr[key],
-                            };
-                            itemRef = removeItem(items, key);
-                            result.push(item);
-                        });
-
-                        setDinnerListItems(result);
-                        setItems(itemRef);
-                    }
-                } else {
-                    // doc.data() will be undefined in this case
-                    console.log("No such document!");
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
-        totalRef
-            .get()
-            .then((doc) => {
-                if (doc.exists) {
-                    let arr = doc.data();
-                    setTotalDinner(arr["totalDinner"]);
-                } else {
-                    // doc.data() will be undefined in this case
-                    console.log("No such document!");
-                }
-            })
-            .catch((error) => {
-                console.log("Error getting document:", error);
-            });
+        result = [];
+        for (const key in infoData) {
+            const item = {
+                type: key,
+                servings: infoData[key],
+            };
+            if (key != "total") {
+                result.push(item);
+            }
+        }
+        setFoodItems(result);
     }, []);
 
     return (
-        <ScrollView style={{ height: "100%" }}>
+        <ScrollView>
             <View
                 style={{
                     display: "flex",
                     flex: 1,
                     alignItems: "center",
-                    paddingTop: 40,
                 }}
             >
                 {/* Main Heading */}
@@ -284,7 +227,7 @@ const Dinner = () => {
                     <Text style={styles.row1}> Serving </Text>
                 </View>
 
-                {dinnerListItems.map((item) => (
+                {foodItems.map((item) => (
                     <View style={styles.tableList}>
                         <View style={styles.wrapper}>
                             <Text style={styles.row2}> {item.type} </Text>
@@ -306,6 +249,9 @@ const Dinner = () => {
                     <Icon name="add" color="white" />
                 </TouchableOpacity>
 
+                {/* POP-UP MENU */}
+                {/* POP-UP MENU */}
+                {/* POP-UP MENU */}
                 <Overlay
                     overlayStyle={{ borderRadius: 10, margin: 10 }}
                     isVisible={visible}
@@ -380,7 +326,7 @@ const Dinner = () => {
     );
 };
 
-export default Dinner;
+export default Food;
 
 const styles = StyleSheet.create({
     button: {
@@ -410,32 +356,23 @@ const styles = StyleSheet.create({
     raisedSides: {
         width: 52,
         height: 52,
-        shadowColor: "rgba(0,0,0, .8)", // IOS
-        shadowOffset: { height: 2, width: 2 }, // IOS
-        shadowOpacity: 2, // IOS
-        shadowRadius: 3, //IOS
-        backgroundColor: "#fff",
-        elevation: 4, // Android
+        borderRadius: 10,
+        backgroundColor: "#ccc",
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "row",
         flex: 1,
-        marginRight: 10,
+        marginLeft: 5,
+        marginRight: 5,
     },
     raisedMiddle: {
         width: 52,
         height: 52,
-        shadowColor: "rgba(0,0,0, .8)", // IOS
-        shadowOffset: { height: 2, width: 2 }, // IOS
-        shadowOpacity: 2, // IOS
-        shadowRadius: 3, //IOS
         backgroundColor: "#fff",
-        elevation: 4, // Android
         justifyContent: "center",
         alignItems: "center",
         flexDirection: "row",
         flex: 4,
-        marginRight: 10,
     },
 
     tableList: {
@@ -483,8 +420,9 @@ const styles = StyleSheet.create({
         backgroundColor: "green",
         width: 55,
         height: 55,
-        top: 680,
+        top: 0,
         left: 300,
+        bottom: 10,
         zIndex: 5,
         borderRadius: 100,
         justifyContent: "center",
