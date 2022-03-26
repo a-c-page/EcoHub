@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Start from "./screens/Start";
 import LoginScreen from "./screens/LoginScreen";
 import { LogBox } from "react-native";
+import Splash from "./screens/Splash";
 
 const Stack = createNativeStackNavigator();
 LogBox.ignoreLogs([
@@ -17,6 +18,11 @@ export default function App() {
         <StateProvider>
             <NavigationContainer>
                 <Stack.Navigator>
+                    <Stack.Screen
+                        name="Splash"
+                        component={Splash}
+                        options={{ headerShown: false, gestureEnabled: false }}
+                    ></Stack.Screen>
                     <Stack.Screen
                         name="Login"
                         component={LoginScreen}

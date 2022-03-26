@@ -5,24 +5,20 @@ import {
     Text,
     TouchableOpacity,
     StyleSheet,
-    FlatList,
 } from "react-native";
 import { Overlay, Icon } from "react-native-elements";
 import DropDownPicker from "react-native-dropdown-picker";
-import { Table, Row, Rows } from "react-native-table-component";
 import { StateContext } from "../StateProvider";
 import { app } from "../../firebase";
 import {
-    collection,
     doc,
     getFirestore,
     getDoc,
     setDoc,
-    getDocs,
     updateDoc,
     deleteField,
+    increment,
 } from "firebase/firestore";
-import { async } from "@firebase/util";
 
 const remove = (arr, val) => {
     // Remove from the breakfastList
@@ -41,14 +37,8 @@ const remove = (arr, val) => {
 };
 
 const Food = ({ route, navigation }) => {
-    const {
-        foodItems,
-        setFoodItems,
-        userID,
-        dietAmount,
-        totalBreakfast,
-        setTotalBreakfast,
-    } = useContext(StateContext);
+    const { foodItems, setFoodItems, userID, dietAmount } =
+        useContext(StateContext);
     const [visible, setVisible] = useState(false);
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
@@ -98,10 +88,14 @@ const Food = ({ route, navigation }) => {
             let docData = {};
             docData[value] = serving;
 
-            let test = {
+            let item = {
                 type: value,
                 servings: serving,
             };
+
+            let result = dietAmount[item.type] * item.servings;
+
+            docData["total"] = increment(result);
 
             const dayDocRef = doc(
                 db,
@@ -110,34 +104,12 @@ const Food = ({ route, navigation }) => {
             );
             await updateDoc(dayDocRef, docData);
 
-            setFoodItems((foodItems) => [...foodItems, test]);
+            setFoodItems((foodItems) => [...foodItems, item]);
 
             toggleOverlay();
             setServing(0);
             setValue(null);
             toggleOverlay();
-
-            // let result = dietAmount[item.type] * item.servings;
-            // console.log(result);
-            // let len = breakfastListItems.length;
-
-            // for (let i = 0; i < len; i++) {
-            //     let label = breakfastListItems[i].type;
-            //     let servings = breakfastListItems[i].servings;
-            //     result += dietAmount[label] * servings;
-            // }
-            // setTotalBreakfast(result);
-
-            // let tempData = { totalBreakfast: result };
-
-            // totalRef
-            //     .update(tempData)
-            //     .then(() => {
-            //         console.log("Document successfully written!");
-            //     })
-            //     .catch((error) => {
-            //         totalRef.set(tempData);
-            //     });
         } else if (value == null) {
             alert("Please select an item");
         } else if (serving == 0) {
@@ -149,29 +121,15 @@ const Food = ({ route, navigation }) => {
         let arr = remove(foodItems, item.type);
         setFoodItems(arr);
 
+        let result = dietAmount[item.type] * item.servings * -1;
+
         //Removing it from database
         let docData = {};
-        docData[item.type] = deleteField();
+        docData[item.type] = deleteField(result);
+        docData["total"] = increment(result);
 
         const dayDocRef = doc(db, `userInfo/${userID}/dietTotals`, currDate);
         await updateDoc(dayDocRef, docData);
-
-        // // Removing from the thing
-        // let result = totalBreakfast;
-        // result -= dietAmount[item.type] * item.servings;
-        // setTotalBreakfast(result);
-
-        // let tempData = { totalBreakfast: result };
-
-        // totalRef
-        //     .update(tempData)
-        //     .then(() => {
-        //         console.log("Document successfully written!");
-        //     })
-        //     .catch((error) => {
-        //         totalRef.set(tempData);
-        //         //console.error("Error writing document: ", error);
-        //     });
     };
 
     useEffect(async () => {

@@ -49,31 +49,15 @@ export const StateContext = createContext();
 export const StateProvider = (props) => {
     const [userID, setUserID] = useState("");
     const [foodItems, setFoodItems] = useState([]);
-    const [transportationListItems, setTransportationListItems] = useState([]);
-    const [totalDiet, setTotalDiet] = useState(0);
-    const [totalBreakfast, setTotalBreakfast] = useState(0);
-    const [totalLunch, setTotalLunch] = useState(0);
-    const [totalDinner, setTotalDinner] = useState(0);
-    const [totalTransportation, setTotalTransportation] = useState(0);
+
     // Value's that goes through to all components
     const value = {
         userID,
         dietAmount,
         transportAmount,
         foodItems,
-        transportationListItems,
-        totalTransportation,
-        totalLunch,
-        totalDinner,
-        totalBreakfast,
         setUserID,
         setFoodItems,
-        setTransportationListItems,
-        setTotalTransportation,
-        setTotalDiet,
-        setTotalBreakfast,
-        setTotalLunch,
-        setTotalDinner,
     };
 
     return (

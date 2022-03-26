@@ -18,6 +18,7 @@ import {
     getDocs,
 } from "firebase/firestore";
 import { StateContext } from "../StateProvider";
+import { SwipeablePanel } from "rn-swipeable-panel";
 
 const getDateString = (date) => {
     var day = date.getDate();
@@ -39,6 +40,24 @@ const DietMenu = ({ navigation }) => {
     const [items, setItems] = useState([]);
     const [dateString, setDateString] = useState();
     const db = getFirestore(app);
+    const [panelProps, setPanelProps] = useState({
+        fullWidth: true,
+        openLarge: false,
+        onlySmall: true,
+        showCloseButton: true,
+        smallPanelHeight: 600,
+        onClose: () => closePanel(),
+        onPressCloseButton: () => closePanel(),
+    });
+    const [isPanelActive, setIsPanelActive] = useState(false);
+
+    const openPanel = () => {
+        setIsPanelActive(true);
+    };
+
+    const closePanel = () => {
+        setIsPanelActive(false);
+    };
 
     const showDatePicker = () => {
         setDatePickerVisibility(true);
@@ -207,6 +226,12 @@ const DietMenu = ({ navigation }) => {
                     <Text style={styles.row1}> Diet </Text>
                     <Text style={styles.row1}> CO2 Emission / g </Text>
                 </View>
+
+                <SwipeablePanel
+                    {...panelProps}
+                    isActive={isPanelActive}
+                ></SwipeablePanel>
+
                 {items.map((item) => (
                     <View style={styles.wrapper}>
                         <Text style={styles.row2}> {item[0]} </Text>
@@ -223,9 +248,10 @@ const DietMenu = ({ navigation }) => {
             />
             <TouchableOpacity
                 style={styles.floatingActionButton}
-                onPress={() =>
-                    navigation.navigate("Food", { currDate: dateString })
-                }
+                onPress={openPanel}
+                //{() =>
+                //    navigation.navigate("Food", { currDate: dateString })
+                //}
             >
                 <Icon name="add" color="white" />
             </TouchableOpacity>
