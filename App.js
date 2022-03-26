@@ -21,17 +21,26 @@ export default function App() {
                     <Stack.Screen
                         name="Splash"
                         component={Splash}
-                        options={{ headerShown: false, gestureEnabled: false }}
+                        options={{
+                            headerShown: false,
+                            gestureEnabled: false,
+                        }}
                     ></Stack.Screen>
                     <Stack.Screen
                         name="Login"
                         component={LoginScreen}
-                        options={{ headerShown: false, gestureEnabled: false }}
+                        options={{
+                            headerShown: false,
+                            gestureEnabled: false,
+                        }}
                     ></Stack.Screen>
                     <Stack.Screen
                         name="Start"
                         component={Start}
-                        options={{ headerShown: false, gestureEnabled: false }}
+                        options={{
+                            headerShown: false,
+                            gestureEnabled: false,
+                        }}
                     ></Stack.Screen>
                 </Stack.Navigator>
             </NavigationContainer>

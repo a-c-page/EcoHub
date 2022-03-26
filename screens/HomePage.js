@@ -6,13 +6,16 @@ import {
     TouchableOpacity,
     Image,
     ImageBackground,
+    Dimensions,
+    ScrollView,
 } from "react-native";
 import { COLORS, SIZES, FONTS } from "../constants/index";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import Diet from "./Diet/Diet";
-import Household from "./Household";
+import Devices from "./Devices";
 import Transportation from "./Transportation/Transportation";
-import { ScrollView } from "react-native-gesture-handler";
+import HomeMenuItem from "../components/HomeMenuItem";
+import GlobalStyles from "../styles/GlobalStyles";
 
 const Stack = createNativeStackNavigator();
 
@@ -24,7 +27,7 @@ const HomePage = ({ navigation }) => {
                 name="Home Display"
                 component={HomeDisplay}
             />
-            <Stack.Screen name="Household" component={Household} />
+            <Stack.Screen name="Devices" component={Devices} />
             <Stack.Screen name="Transportation" component={Transportation} />
             <Stack.Screen name="Diet" component={Diet} />
         </Stack.Navigator>
@@ -33,25 +36,37 @@ const HomePage = ({ navigation }) => {
 
 const HomeDisplay = ({ navigation }) => {
     return (
-        <ScrollView>
-            <View style={styles.mainContainer}>
-                <TouchableOpacity style={styles.button}>
-                    <Text>TETET</Text>
-                </TouchableOpacity>
+        <>
+            <View style={GlobalStyles.header}>
+                <Image
+                    style={GlobalStyles.headerLogo}
+                    source={require("../assets/EcoPal.png")}
+                ></Image>
             </View>
-        </ScrollView>
+            <ScrollView>
+                <View style={GlobalStyles.homeMainContainer}>
+                    <HomeMenuItem
+                        itemText={"House"}
+                        imagePath={require("../assets/houseVector.jpg")}
+                        click={"Devices"}
+                        navigation={navigation}
+                    ></HomeMenuItem>
+                    <HomeMenuItem
+                        itemText={"Food"}
+                        imagePath={require("../assets/foodVector.jpg")}
+                        click={"Diet"}
+                        navigation={navigation}
+                    ></HomeMenuItem>
+                    <HomeMenuItem
+                        itemText={"Transportation"}
+                        imagePath={require("../assets/carVector.png")}
+                        click={"Transportation"}
+                        navigation={navigation}
+                    ></HomeMenuItem>
+                </View>
+            </ScrollView>
+        </>
     );
 };
-
-const styles = StyleSheet.create({
-    mainContainer: {
-        justifyContent: "center",
-        alignItems: "center",
-    },
-    button: {
-        width: "90%",
-        height: 200,
-    },
-});
 
 export default HomePage;

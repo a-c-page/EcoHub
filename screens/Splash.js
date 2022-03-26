@@ -1,59 +1,41 @@
-import React, { useEffect, useState, useContext } from "react";
-import {
-    ImageBackground,
-    KeyboardAvoidingView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
-    Image,
-} from "react-native";
+import { useEffect, useContext } from "react";
+import { View, Image } from "react-native";
 import { app } from "../firebase";
-import {
-    getAuth,
-    createUserWithEmailAndPassword,
-    signInWithEmailAndPassword,
-    onAuthStateChanged,
-} from "firebase/auth";
+import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { StateContext } from "./StateProvider";
+import GlobalStyles from "../styles/GlobalStyles";
+import Colours from "../styles/Colours";
 
-const LoginScreen = ({ navigation }) => {
-    const { userID, setUserID } = useContext(StateContext);
+const Splash = ({ navigation }) => {
+    const { userID, setUserID, colours } = useContext(StateContext);
     const auth = getAuth(app);
+
     useEffect(() => {
+        let navigateTo;
         onAuthStateChanged(auth, (user) => {
             if (user) {
                 setUserID(user.uid);
                 console.log("Logged in with UID: " + user.uid);
-                navigation.navigate("Start");
+                navigateTo = "Start";
             } else {
-                navigation.navigate("Login");
+                navigateTo = "Login";
             }
+            setTimeout(() => {
+                navigation.navigate(navigateTo);
+            }, 1000);
         });
     }, []);
 
     return (
-        <View style={styles.container}>
-            <Image
-                style={styles.image}
-                source={require(".././assets/EcoHub.png")}
-            />
+        <View style={GlobalStyles.background}>
+            <View style={GlobalStyles.logoImageView}>
+                <Image
+                    style={GlobalStyles.logoImage}
+                    source={require(".././assets/EcoPal.png")}
+                />
+            </View>
         </View>
     );
 };
 
-export default LoginScreen;
-
-const styles = StyleSheet.create({
-    container: {
-        height: "100%",
-        justifyContent: "center",
-        alignItems: "center",
-        backgroundColor: "green",
-    },
-    image: {
-        height: 200,
-        width: 200,
-    },
-});
+export default Splash;
