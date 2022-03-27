@@ -1,21 +1,11 @@
-import {
-    View,
-    Text,
-    StyleSheet,
-    FlatList,
-    TouchableOpacity,
-    Image,
-    ImageBackground,
-    Dimensions,
-    ScrollView,
-} from "react-native";
+import { View, Image, ScrollView } from "react-native";
 import { COLORS, SIZES, FONTS } from "../constants/index";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
-import Diet from "./Diet/Diet";
+import DietScreen from "./DietScreen";
 import Devices from "./Devices";
-import Transportation from "./Transportation/Transportation";
 import HomeMenuItem from "../components/HomeMenuItem";
 import GlobalStyles from "../styles/GlobalStyles";
+import TransportationScreen from "./TransportationScreen";
 
 const Stack = createNativeStackNavigator();
 
@@ -28,8 +18,16 @@ const HomePage = ({ navigation }) => {
                 component={HomeDisplay}
             />
             <Stack.Screen name="Devices" component={Devices} />
-            <Stack.Screen name="Transportation" component={Transportation} />
-            <Stack.Screen name="Diet" component={Diet} />
+            <Stack.Screen
+                options={{ headerShown: false }}
+                name="Transportation"
+                component={TransportationScreen}
+            />
+            <Stack.Screen
+                options={{ headerShown: false }}
+                name="Diet"
+                component={DietScreen}
+            />
         </Stack.Navigator>
     );
 };

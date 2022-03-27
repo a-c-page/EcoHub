@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useContext } from "react";
 import {
-    ImageBackground,
     KeyboardAvoidingView,
     StyleSheet,
     Text,
@@ -15,6 +14,7 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
 } from "firebase/auth";
+import { doc, setDoc, getFirestore } from "firebase/firestore";
 import { StateContext } from "./StateProvider";
 
 const LoginScreen = ({ navigation }) => {
@@ -22,6 +22,7 @@ const LoginScreen = ({ navigation }) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const auth = getAuth(app);
+    const db = getFirestore(app);
 
     useEffect(() => {
         onAuthStateChanged(auth, (user) => {
@@ -38,6 +39,8 @@ const LoginScreen = ({ navigation }) => {
             .then((userCredentials) => {
                 const user = userCredentials.user;
                 console.log("Registered with:", user.email);
+                const accountDocRef = doc(db, "userInfo", user.uid);
+                setDoc(accountDocRef, {});
             })
             .catch((error) => alert(error.message));
     };

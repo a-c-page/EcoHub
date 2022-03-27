@@ -7,18 +7,7 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import colours from "../styles/Colours";
 
 const Profile = ({ navigation }) => {
-    const {
-        setUserID,
-        setBreakfastListItems,
-        setLunchListItems,
-        setDinnerListItems,
-        setTransportationListItems,
-        setTotalTransportation,
-        setTotalBreakfast,
-        setTotalLunch,
-        setTotalDinner,
-        userID,
-    } = useContext(StateContext);
+    const { setUserID, setFoodItems, userID } = useContext(StateContext);
     const auth = getAuth(app);
 
     const handleLogout = () => {
@@ -28,14 +17,7 @@ const Profile = ({ navigation }) => {
 
                 // Reset all the states
                 setUserID(null);
-                setBreakfastListItems([]);
-                setLunchListItems([]);
-                setDinnerListItems([]);
-                setTransportationListItems([]);
-                setTotalTransportation(0);
-                setTotalBreakfast(0);
-                setTotalLunch(0);
-                setTotalDinner(0);
+                setFoodItems(null);
             })
             .catch((error) => {
                 alert(error.message);
@@ -58,10 +40,7 @@ const Profile = ({ navigation }) => {
             >
                 <Text style={styles.buttonText}>Suggestions</Text>
             </TouchableOpacity>
-            <TouchableOpacity
-                onPress={() => console.log("PRESSED")}
-                style={styles.button}
-            >
+            <TouchableOpacity onPress={handleLogout} style={styles.button}>
                 <Text style={styles.buttonText}>Logout</Text>
                 <MaterialCommunityIcons
                     name="logout-variant"
