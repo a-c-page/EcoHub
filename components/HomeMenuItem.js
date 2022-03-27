@@ -1,5 +1,5 @@
 import React from "react";
-import { Text, View, TouchableOpacity, Image } from "react-native";
+import { Text, View, TouchableOpacity, ImageBackground } from "react-native";
 import GlobalStyles from "../styles/GlobalStyles";
 
 const HomeMenuItem = ({ imagePath, itemText, click, navigation }) => {
@@ -9,13 +9,13 @@ const HomeMenuItem = ({ imagePath, itemText, click, navigation }) => {
             onPress={() => navigation.navigate(click)}
         >
             <View style={GlobalStyles.menuItemMainView}>
-                <Text style={GlobalStyles.menuItemText}>{itemText}</Text>
-                <View style={GlobalStyles.menuItemImageView}>
-                    <Image
-                        style={GlobalStyles.menuItemImage}
-                        source={imagePath}
-                    ></Image>
-                </View>
+                <ImageBackground
+                    style={GlobalStyles.menuItemImage}
+                    source={imagePath}
+                    imageStyle={{ borderRadius: 20 }}
+                >
+                    <Text style={GlobalStyles.menuItemText}>{itemText}</Text>
+                </ImageBackground>
             </View>
         </TouchableOpacity>
     );

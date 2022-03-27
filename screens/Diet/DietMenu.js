@@ -1,11 +1,11 @@
 import { useEffect, useContext, useState } from "react";
 import {
-    VictoryChart,
-    VictoryGroup,
-    VictoryBar,
-    VictoryLegend,
-} from "victory-native";
-import { View, Text, TouchableOpacity, StyleSheet } from "react-native";
+    View,
+    Text,
+    TouchableOpacity,
+    StyleSheet,
+    ScrollView,
+} from "react-native";
 import { Icon } from "react-native-elements";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { app } from "../../firebase";
@@ -19,6 +19,7 @@ import {
 } from "firebase/firestore";
 import { StateContext } from "../StateProvider";
 import { SwipeablePanel } from "rn-swipeable-panel";
+import colours from "../../styles/Colours";
 
 const getDateString = (date) => {
     var day = date.getDate();
@@ -78,44 +79,6 @@ const DietMenu = ({ navigation }) => {
             await setDoc(dayDocRef, { total: 0 });
         }
 
-        // var docRef = db
-        //     .collection("totals")
-        //     .doc(userID)
-        //     .collection("data")
-        //     .doc(result);
-        // docRef
-        //     .get()
-        //     .then((doc) => {
-        //         if (doc.exists) {
-        //             let arr = doc.data();
-        //             let test = [
-        //                 ["Breakfast", "-"],
-        //                 ["Lunch", "-"],
-        //                 ["Dinner", "-"],
-        //             ];
-        //             var result = Object.keys(arr).map((key) => {
-        //                 if (key.substring(5) === "Breakfast") {
-        //                     test[0][1] = arr[key] == 0 ? "-" : arr[key];
-        //                 } else if (key.substring(5) === "Lunch") {
-        //                     test[1][1] = arr[key] == 0 ? "-" : arr[key];
-        //                 } else if (key.substring(5) === "Dinner") {
-        //                     test[2][1] = arr[key] == 0 ? "-" : arr[key];
-        //                 }
-        //             });
-        //             setItems(test);
-        //         } else {
-        //             let test = [
-        //                 ["Breakfast", "-"],
-        //                 ["Lunch", "-"],
-        //                 ["Dinner", "-"],
-        //             ];
-        //             setItems(test);
-        //         }
-        //     })
-        //     .catch((error) => {
-        //         console.log("Error getting document:", error);
-        //     });
-
         setCurrDate(date);
         hideDatePicker();
     };
@@ -154,60 +117,31 @@ const DietMenu = ({ navigation }) => {
         });
         setGraphData(data);
         setShow(true);
-
-        let test = [
-            ["Breakfast", "-"],
-            ["Lunch", "-"],
-            ["Dinner", "-"],
-        ];
-        setItems(test);
     }, []);
 
     return (
         <>
             <View style={{ flex: 1, alignItems: "center" }}>
-                <Text style={styles.title}>Past Week</Text>
-                <View>
-                    {show ? (
-                        <VictoryChart width={350} domainPadding={{ x: 20 }}>
-                            <VictoryGroup offset={0}>
-                                <VictoryBar
-                                    barWidth={20}
-                                    data={graphData}
-                                    style={{
-                                        data: {
-                                            fill: "green",
-                                        },
-                                    }}
-                                    barRatio={0.8}
-                                    animate={{
-                                        duration: 500,
-                                    }}
-                                />
-                            </VictoryGroup>
-                            <VictoryLegend
-                                x={100}
-                                orientation="horizontal"
-                                alignItems="center"
-                                gutter={10}
-                                data={[
-                                    {
-                                        name: "CO2 Emission / g",
-                                        symbol: {
-                                            fill: "green",
-                                        },
-                                    },
-                                ]}
-                            />
-                        </VictoryChart>
-                    ) : null}
-                </View>
+                <ScrollView horizontal={true} style={{ width: "100%" }}>
+                    <View
+                        style={{
+                            width: 150,
+                            height: 150,
+                            backgroundColor: colours.grey,
+                            borderRadius: 30,
+                        }}
+                    >
+                        <Text style={{ textAlign: "center", paddingTop: 10 }}>
+                            Chicken
+                        </Text>
+                    </View>
+                </ScrollView>
                 <TouchableOpacity
                     onPress={showDatePicker}
                     style={{
                         color: "white",
                         marginBottom: 20,
-                        backgroundColor: "green",
+                        backgroundColor: colours.main,
                         padding: 10,
                         borderRadius: 10,
                     }}
@@ -222,22 +156,11 @@ const DietMenu = ({ navigation }) => {
                         {dateString}
                     </Text>
                 </TouchableOpacity>
-                <View style={styles.wrapper}>
-                    <Text style={styles.row1}> Diet </Text>
-                    <Text style={styles.row1}> CO2 Emission / g </Text>
-                </View>
 
                 <SwipeablePanel
                     {...panelProps}
                     isActive={isPanelActive}
                 ></SwipeablePanel>
-
-                {items.map((item) => (
-                    <View style={styles.wrapper}>
-                        <Text style={styles.row2}> {item[0]} </Text>
-                        <Text style={styles.row3}> {item[1]} </Text>
-                    </View>
-                ))}
             </View>
             <DateTimePickerModal
                 isVisible={isDatePickerVisible}
@@ -285,7 +208,7 @@ const styles = StyleSheet.create({
     },
 
     floatingActionButton: {
-        backgroundColor: "green",
+        backgroundColor: colours.main,
         width: 55,
         height: 55,
         position: "absolute",

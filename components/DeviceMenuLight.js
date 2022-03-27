@@ -14,12 +14,7 @@ import GlobalStyles from "../styles/GlobalStyles";
 import colours from "../styles/Colours";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-const DeviceMenuLight = ({
-    lightIcon,
-    lightText,
-    switchValue,
-    switchValueSet,
-}) => {
+const DeviceMenuLight = ({ lightText, switchValue, switchValueSet }) => {
     const lightSwitchHandler = () => {
         switchValueSet(!switchValue);
         let status = switchValue ? "off" : "on";
@@ -55,7 +50,10 @@ const DeviceMenuLight = ({
                 </View>
 
                 <Switch
-                    trackColor={{ true: colours.secondary }}
+                    trackColor={{
+                        true: colours.secondary,
+                        false: colours.grey,
+                    }}
                     value={switchValue}
                     onValueChange={lightSwitchHandler}
                     style={{ marginLeft: 150, marginTop: 5 }}

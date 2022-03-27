@@ -47,19 +47,19 @@ const HomeDisplay = ({ navigation }) => {
                 <View style={GlobalStyles.homeMainContainer}>
                     <HomeMenuItem
                         itemText={"House"}
-                        imagePath={require("../assets/houseVector.jpg")}
+                        imagePath={require("../assets/housePicture.jpg")}
                         click={"Devices"}
                         navigation={navigation}
                     ></HomeMenuItem>
                     <HomeMenuItem
                         itemText={"Food"}
-                        imagePath={require("../assets/foodVector.jpg")}
+                        imagePath={require("../assets/foodPicture.jpg")}
                         click={"Diet"}
                         navigation={navigation}
                     ></HomeMenuItem>
                     <HomeMenuItem
                         itemText={"Transportation"}
-                        imagePath={require("../assets/carVector.png")}
+                        imagePath={require("../assets/transportPicture.jpg")}
                         click={"Transportation"}
                         navigation={navigation}
                     ></HomeMenuItem>

@@ -21,9 +21,6 @@ const Devices = () => {
     const [lightSwitch3, setToggle3] = useState(false);
     const [lightSwitch4, setToggle4] = useState(false);
     const [temp, setTemp] = useState(20);
-    const lightIcon = require("../assets/light.png");
-    const thermoIcon = require("../assets/thermometer.png");
-
     const tempBtnHandler = () => {
         fetch(server.base + server.setTemp(temp))
             .then((res) => res.json())
@@ -40,7 +37,6 @@ const Devices = () => {
             }}
         >
             <DeviceMenuLight
-                lightIcon={lightIcon}
                 lightText={"Room 1"}
                 switchValue={lightSwitch1}
                 switchValueSet={setToggle1}
@@ -74,12 +70,19 @@ const Devices = () => {
                     <TextInput
                         keyboardType="numeric"
                         returnKeyType="done"
+                        maxLength={4}
                         style={{
                             fontSize: 14,
-                            marginLeft: 60,
+                            marginLeft: 25,
+                            marginTop: 5,
                             paddingRight: 10,
+                            textAlign: "center",
+                            justifyContent: "center",
+                            alignItems: "center",
+                            width: 100,
                         }}
-                        placeholder="Temp *C"
+                        placeholder="Temp °C"
+                        placeholderTextColor={colours.darkGrey}
                         value={temp}
                         onChangeText={(text) => setTemp(text)}
                     />
@@ -101,21 +104,18 @@ const Devices = () => {
             </View>
 
             <DeviceMenuLight
-                lightIcon={lightIcon}
                 lightText={"Room 2"}
                 switchValue={lightSwitch2}
                 switchValueSet={setToggle2}
             ></DeviceMenuLight>
 
             <DeviceMenuLight
-                lightIcon={lightIcon}
                 lightText={"Room 3"}
                 switchValue={lightSwitch3}
                 switchValueSet={setToggle3}
             ></DeviceMenuLight>
 
             <DeviceMenuLight
-                lightIcon={lightIcon}
                 lightText={"Room 4"}
                 switchValue={lightSwitch4}
                 switchValueSet={setToggle4}
