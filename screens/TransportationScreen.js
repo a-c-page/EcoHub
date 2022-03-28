@@ -67,13 +67,12 @@ const TransportationScreen = ({ navigation }) => {
         onPressCloseButton: () => closePanel(),
         scrollViewProps: { scrollEnabled: false },
     });
-
+    const [isPanelActive, setIsPanelActive] = useState(false);
     const [visible, setVisible] = useState(false);
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [kmTravelled, setKmTravelled] = useState(0);
     const [total, setTotal] = useState(0);
-    const [isPanelActive, setIsPanelActive] = useState(false);
 
     const openPanel = () => {
         setIsPanelActive(true);
@@ -186,7 +185,7 @@ const TransportationScreen = ({ navigation }) => {
             for (const key in info) {
                 const item = {
                     type: key,
-                    servings: info[key],
+                    km: info[key],
                 };
                 if (key != "total") {
                     result.push(item);
@@ -219,7 +218,7 @@ const TransportationScreen = ({ navigation }) => {
             for (const key in info) {
                 const item = {
                     type: key,
-                    servings: info[key],
+                    km: info[key],
                 };
                 if (key != "total") {
                     result.push(item);
@@ -449,7 +448,9 @@ const TransportationScreen = ({ navigation }) => {
                         }}
                         placeholder="KM Travelled"
                         placeholderTextColor={colours.darkGrey}
-                        onChangeText={(text) => setKmTravelled(text)}
+                        onChangeText={(text) =>
+                            setKmTravelled(parseFloat(text))
+                        }
                     />
 
                     <TouchableOpacity

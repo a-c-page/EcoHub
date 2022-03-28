@@ -85,25 +85,6 @@ const LoginScreen = ({ navigation }) => {
                 />
 
                 <TouchableOpacity
-                    style={{
-                        height: 50,
-                        alignContent: "center",
-                        justifyContent: "center",
-                        alignSelf: "center",
-                        marginBottom: 30,
-                    }}
-                >
-                    <Text
-                        style={{
-                            fontSize: 16,
-                            color: colours.darkGrey,
-                        }}
-                    >
-                        Forgot Password
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
                     onPress={handleLogin}
                     style={{
                         height: 70,
@@ -113,6 +94,7 @@ const LoginScreen = ({ navigation }) => {
                         marginVertical: 8,
                         justifyContent: "center",
                         alignItems: "center",
+                        marginTop: 50,
                     }}
                 >
                     <Text style={styles.buttonText}>LOGIN</Text>
@@ -159,7 +141,7 @@ const styles = StyleSheet.create({
 
     inputContainer: {
         width: "80%",
-        marginTop: -50,
+        marginTop: -60,
     },
 
     input: {

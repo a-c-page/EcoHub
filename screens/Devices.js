@@ -43,7 +43,7 @@ const Devices = () => {
                 roomNum={"room1"}
             ></DeviceMenuLight>
 
-            <View
+            {/* <View
                 style={{
                     width: 350,
                     paddingVertical: 25,
@@ -102,7 +102,7 @@ const Devices = () => {
                         <Text style={{ color: "white" }}>Set</Text>
                     </TouchableOpacity>
                 </View>
-            </View>
+            </View> */}
 
             <DeviceMenuLight
                 lightText={"Room 2"}

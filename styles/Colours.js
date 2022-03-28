@@ -7,5 +7,6 @@ let colours = {
     white: "#ffffff",
     grey: "#cccccc",
     darkGrey: "#6e6e6e",
+    alert: "#a70000",
 };
 export default colours;

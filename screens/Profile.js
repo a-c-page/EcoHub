@@ -35,12 +35,12 @@ const Profile = ({ navigation }) => {
                 size={150}
             />
             <Text style={{ paddingBottom: 150 }}>User ID: {userID}</Text>
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 onPress={() => console.log("PRESSED")}
                 style={styles.button}
             >
                 <Text style={styles.buttonText}>Suggestions</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
             <TouchableOpacity onPress={handleLogout} style={styles.button}>
                 <Text style={styles.buttonText}>Logout</Text>
                 <MaterialCommunityIcons

@@ -39,6 +39,10 @@ export default StyleSheet.create({
         width: 100,
         marginTop: 25,
     },
+    headerBell: {
+        marginLeft: 270,
+        marginTop: -65,
+    },
     homeMainContainer: {
         paddingTop: 160,
         flex: 1,
