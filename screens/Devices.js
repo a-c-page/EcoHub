@@ -40,6 +40,7 @@ const Devices = () => {
                 lightText={"Room 1"}
                 switchValue={lightSwitch1}
                 switchValueSet={setToggle1}
+                roomNum={"room1"}
             ></DeviceMenuLight>
 
             <View
@@ -107,18 +108,21 @@ const Devices = () => {
                 lightText={"Room 2"}
                 switchValue={lightSwitch2}
                 switchValueSet={setToggle2}
+                roomNum={"room2"}
             ></DeviceMenuLight>
 
             <DeviceMenuLight
                 lightText={"Room 3"}
                 switchValue={lightSwitch3}
                 switchValueSet={setToggle3}
+                roomNum={"room3"}
             ></DeviceMenuLight>
 
             <DeviceMenuLight
                 lightText={"Room 4"}
                 switchValue={lightSwitch4}
                 switchValueSet={setToggle4}
+                roomNum={"room4"}
             ></DeviceMenuLight>
         </ScrollView>
     );

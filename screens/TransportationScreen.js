@@ -7,6 +7,7 @@ import {
     ScrollView,
     Image,
     Dimensions,
+    TextInput,
 } from "react-native";
 import DateTimePickerModal from "react-native-modal-datetime-picker";
 import { app } from "../firebase";
@@ -38,19 +39,16 @@ const getDateString = (date) => {
 };
 
 const TransportationScreen = ({ navigation }) => {
-    const { transportItems, setTransportItems, userID, transportAmount2 } =
+    const { transportItems, setTransportItems, userID, transportAmount } =
         useContext(StateContext);
-    const [graphData, setGraphData] = useState();
-    const [show, setShow] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [currDate, setCurrDate] = useState(new Date());
     const [items, setItems] = useState([
         { label: "Domestic Flight", value: "Domestic Flight" },
-        { label: "Long Haul Flight", value: "Chocolate" },
+        { label: "Long Haul Flight", value: "Long Haul Flight" },
         { label: "Car", value: "Car" },
         { label: "Bus", value: "Bus" },
         { label: "Domestic Rail", value: "Domestic Rail" },
-        { label: "Coach Bus", value: "Coach Bus" },
         { label: "Electric Vehicle", value: "Electric Vehicle" },
         { label: "Motorbike", value: "Motorbike" },
         { label: "Bike", value: "Bike" },
@@ -73,8 +71,8 @@ const TransportationScreen = ({ navigation }) => {
     const [visible, setVisible] = useState(false);
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
-    const [serving, setServing] = useState(0);
-
+    const [kmTravelled, setKmTravelled] = useState(0);
+    const [total, setTotal] = useState(0);
     const [isPanelActive, setIsPanelActive] = useState(false);
 
     const openPanel = () => {
@@ -98,16 +96,17 @@ const TransportationScreen = ({ navigation }) => {
     };
 
     const addItem = async () => {
-        if (value != null && serving > 0) {
+        if (value != null && kmTravelled > 0) {
             let docData = {};
-            docData[value] = serving;
+            docData[value] = kmTravelled;
 
             let item = {
                 type: value,
-                servings: serving,
+                km: kmTravelled,
             };
 
-            let result = transportAmount2[item.type][1] * item.servings;
+            let result = transportAmount[item.type][1] * item.km;
+            setTotal(total + result);
 
             docData["total"] = increment(result);
 
@@ -121,12 +120,12 @@ const TransportationScreen = ({ navigation }) => {
             setTransportItems((transportItems) => [...transportItems, item]);
 
             toggleOverlay();
-            setServing(0);
+            setKmTravelled(0);
             setValue(null);
             toggleOverlay();
         } else if (value == null) {
             alert("Please select an item");
-        } else if (serving == 0) {
+        } else if (kmTravelled == 0) {
             alert("Please select a serving amount");
         }
     };
@@ -150,7 +149,8 @@ const TransportationScreen = ({ navigation }) => {
         let arr = remove(transportItems, item.type);
         setTransportItems(arr);
 
-        let result = transportAmount2[item.type][1] * item.servings * -1;
+        let result = transportAmount[item.type][1] * item.km * -1;
+        setTotal(total + result);
 
         //Removing it from database
         let docData = {};
@@ -168,6 +168,7 @@ const TransportationScreen = ({ navigation }) => {
     const handleConfirm = async (date) => {
         var conversion = getDateString(date);
         setDateString(conversion);
+
         const dayDocRef = doc(
             db,
             `userInfo/${userID}/transportTotals`,
@@ -175,26 +176,24 @@ const TransportationScreen = ({ navigation }) => {
         );
         const dayDocSnap = await getDoc(dayDocRef);
 
-        // SEE IF DATE IS IN DB
+        // SEE IF TODAY IS IN DB
         if (!dayDocSnap.exists()) {
             await setDoc(dayDocRef, { total: 0 });
-        }
-
-        let info = await getDoc(dayDocRef);
-        let infoData = info.data();
-
-        let result = [];
-        for (const key in infoData) {
-            const item = {
-                type: key,
-                servings: infoData[key],
-            };
-            if (key != "total") {
-                result.push(item);
+        } else {
+            let info = dayDocSnap.data();
+            setTotal(info["total"]);
+            let result = [];
+            for (const key in info) {
+                const item = {
+                    type: key,
+                    servings: info[key],
+                };
+                if (key != "total") {
+                    result.push(item);
+                }
             }
+            setTransportItems(result);
         }
-        setTransportItems(result);
-
         setCurrDate(date);
         hideDatePicker();
     };
@@ -202,8 +201,6 @@ const TransportationScreen = ({ navigation }) => {
     useEffect(async () => {
         const todayDate = getDateString(currDate);
         setDateString(todayDate);
-
-        console.log(userID);
 
         const dayDocRef = doc(
             db,
@@ -215,22 +212,21 @@ const TransportationScreen = ({ navigation }) => {
         // SEE IF TODAY IS IN DB
         if (!dayDocSnap.exists()) {
             await setDoc(dayDocRef, { total: 0 });
-        }
-
-        let info = await getDoc(dayDocRef);
-        let infoData = info.data();
-
-        let result = [];
-        for (const key in infoData) {
-            const item = {
-                type: key,
-                servings: infoData[key],
-            };
-            if (key != "total") {
-                result.push(item);
+        } else {
+            let info = dayDocSnap.data();
+            setTotal(info["total"]);
+            let result = [];
+            for (const key in info) {
+                const item = {
+                    type: key,
+                    servings: info[key],
+                };
+                if (key != "total") {
+                    result.push(item);
+                }
             }
+            setTransportItems(result);
         }
-        setTransportItems(result);
     }, []);
 
     const screenHeight = Dimensions.get("screen").height - 80;
@@ -275,14 +271,14 @@ const TransportationScreen = ({ navigation }) => {
                 </TouchableOpacity>
                 <View style={{ marginTop: 20 }}>
                     <ProgressCircle
-                        percent={30}
+                        percent={(total / 13700) * 100}
                         radius={100}
                         borderWidth={15}
                         color={colours.secondary}
                         shadowColor={colours.pale}
                         bgColor={colours.white}
                     >
-                        <Text style={{ fontSize: 20 }}>{"30%"}</Text>
+                        <Text style={{ fontSize: 20 }}>{total} / 13700</Text>
                     </ProgressCircle>
                 </View>
                 <Text
@@ -302,7 +298,7 @@ const TransportationScreen = ({ navigation }) => {
                     style={{ width: "100%" }}
                     showsHorizontalScrollIndicator={false}
                 >
-                    {Object.keys(transportAmount2).map((item) => (
+                    {Object.keys(transportAmount).map((item) => (
                         <TouchableOpacity>
                             <View
                                 style={{
@@ -337,7 +333,7 @@ const TransportationScreen = ({ navigation }) => {
                                         borderColor: colours.white,
                                         borderWidth: 6,
                                     }}
-                                    source={transportAmount2[item][0]}
+                                    source={transportAmount[item][0]}
                                 ></Image>
                                 <View
                                     style={{
@@ -369,7 +365,7 @@ const TransportationScreen = ({ navigation }) => {
                                             color: colours.main,
                                         }}
                                     >
-                                        {transportAmount2[item][1]} g
+                                        {transportAmount[item][1]} g
                                     </Text>
                                 </View>
                             </View>
@@ -423,7 +419,7 @@ const TransportationScreen = ({ navigation }) => {
                         marginVertical: 20,
                     }}
                 >
-                    Servings
+                    KM Travelled
                 </Text>
 
                 <View
@@ -437,52 +433,24 @@ const TransportationScreen = ({ navigation }) => {
                         marginHorizontal: 10,
                     }}
                 >
-                    <TouchableOpacity
+                    <TextInput
+                        keyboardType="numeric"
+                        returnKeyType="done"
+                        maxLength={4}
                         style={{
-                            height: 55,
-                            borderBottomLeftRadius: 10,
-                            borderTopLeftRadius: 10,
-                            backgroundColor: colours.main,
+                            fontSize: 16,
+                            flex: 3,
+                            textAlign: "center",
                             justifyContent: "center",
                             alignItems: "center",
-                            flexDirection: "row",
-                            flex: 1,
+                            width: 100,
+                            borderRadius: 10,
+                            backgroundColor: colours.white,
                         }}
-                        onPress={() => {
-                            serving > 0 ? setServing(serving - 1) : null;
-                        }}
-                    >
-                        <Text style={{ color: colours.white }}>-</Text>
-                    </TouchableOpacity>
-                    <View
-                        style={{
-                            height: 55,
-                            backgroundColor: "#fff",
-                            justifyContent: "center",
-                            alignItems: "center",
-                            flexDirection: "row",
-                            flex: 1,
-                        }}
-                    >
-                        <Text style={{ fontSize: 20 }}>{serving}</Text>
-                    </View>
-                    <TouchableOpacity
-                        style={{
-                            height: 55,
-                            borderBottomRightRadius: 10,
-                            borderTopRightRadius: 10,
-                            backgroundColor: colours.main,
-                            justifyContent: "center",
-                            alignItems: "center",
-                            flexDirection: "row",
-                            flex: 1,
-                        }}
-                        onPress={() => {
-                            setServing(serving + 1);
-                        }}
-                    >
-                        <Text style={{ color: colours.white }}>+</Text>
-                    </TouchableOpacity>
+                        placeholder="KM Travelled"
+                        placeholderTextColor={colours.darkGrey}
+                        onChangeText={(text) => setKmTravelled(text)}
+                    />
 
                     <TouchableOpacity
                         style={{
@@ -511,14 +479,14 @@ const TransportationScreen = ({ navigation }) => {
                         marginBottom: 10,
                     }}
                 >
-                    Food on this date
+                    Transportation on this date
                 </Text>
                 <View style={{ marginBottom: 20 }}>
                     {transportItems.map((item) => (
                         <View style={styles.tableList}>
                             <View style={styles.wrapper}>
                                 <Text style={styles.row2}> {item.type} </Text>
-                                <Text style={styles.row3}>{item.servings}</Text>
+                                <Text style={styles.row3}>{item.km}</Text>
                                 <TouchableOpacity
                                     style={styles.deleteButton}
                                     onPress={() => handleDelete(item)}

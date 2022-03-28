@@ -7,17 +7,18 @@ import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityI
 import colours from "../styles/Colours";
 
 const Profile = ({ navigation }) => {
-    const { setUserID, setFoodItems, userID } = useContext(StateContext);
+    const { setUserID, setFoodItems, setTransportItems, userID } =
+        useContext(StateContext);
     const auth = getAuth(app);
 
     const handleLogout = () => {
         signOut(auth)
             .then(() => {
-                navigation.navigate("Login");
-
                 // Reset all the states
-                setUserID(null);
-                setFoodItems(null);
+                setUserID("");
+                setFoodItems([]);
+                setTransportItems([]);
+                navigation.popToTop();
             })
             .catch((error) => {
                 alert(error.message);

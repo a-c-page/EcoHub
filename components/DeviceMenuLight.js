@@ -14,11 +14,16 @@ import GlobalStyles from "../styles/GlobalStyles";
 import colours from "../styles/Colours";
 import MaterialCommunityIcons from "react-native-vector-icons/MaterialCommunityIcons";
 
-const DeviceMenuLight = ({ lightText, switchValue, switchValueSet }) => {
+const DeviceMenuLight = ({
+    lightText,
+    switchValue,
+    switchValueSet,
+    roomNum,
+}) => {
     const lightSwitchHandler = () => {
         switchValueSet(!switchValue);
         let status = switchValue ? "off" : "on";
-        fetch(server.base + server.turnOnLight("room1", status))
+        fetch(server.base + server.turnOnLight(roomNum, status))
             .then((res) => res.json())
             .then((value) => console.log(value))
             .catch((err) => console.error(err));

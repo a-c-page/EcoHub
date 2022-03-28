@@ -38,10 +38,8 @@ const getDateString = (date) => {
 };
 
 const DietScreen = ({ navigation }) => {
-    const { foodItems, setFoodItems, userID, dietAmount2 } =
+    const { foodItems, setFoodItems, userID, dietAmount } =
         useContext(StateContext);
-    const [graphData, setGraphData] = useState();
-    const [show, setShow] = useState(false);
     const [isDatePickerVisible, setDatePickerVisibility] = useState(false);
     const [currDate, setCurrDate] = useState(new Date());
     const [items, setItems] = useState([
@@ -78,13 +76,12 @@ const DietScreen = ({ navigation }) => {
         onPressCloseButton: () => closePanel(),
         scrollViewProps: { scrollEnabled: false },
     });
-
     const [visible, setVisible] = useState(false);
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(null);
     const [serving, setServing] = useState(0);
-
     const [isPanelActive, setIsPanelActive] = useState(false);
+    const [total, setTotal] = useState(0);
 
     const openPanel = () => {
         setIsPanelActive(true);
@@ -116,7 +113,8 @@ const DietScreen = ({ navigation }) => {
                 servings: serving,
             };
 
-            let result = dietAmount2[item.type][1] * item.servings;
+            let result = dietAmount[item.type][1] * item.servings;
+            setTotal(total + result);
 
             docData["total"] = increment(result);
 
@@ -160,7 +158,8 @@ const DietScreen = ({ navigation }) => {
         let arr = remove(foodItems, item.type);
         setFoodItems(arr);
 
-        let result = dietAmount2[item.type][1] * item.servings * -1;
+        let result = dietAmount[item.type][1] * item.servings * -1;
+        setTotal(total + result);
 
         //Removing it from database
         let docData = {};
@@ -174,29 +173,28 @@ const DietScreen = ({ navigation }) => {
     const handleConfirm = async (date) => {
         var conversion = getDateString(date);
         setDateString(conversion);
+
         const dayDocRef = doc(db, `userInfo/${userID}/dietTotals`, conversion);
         const dayDocSnap = await getDoc(dayDocRef);
 
-        // SEE IF DATE IS IN DB
+        // SEE IF TODAY IS IN DB
         if (!dayDocSnap.exists()) {
             await setDoc(dayDocRef, { total: 0 });
-        }
-
-        let info = await getDoc(dayDocRef);
-        let infoData = info.data();
-
-        let result = [];
-        for (const key in infoData) {
-            const item = {
-                type: key,
-                servings: infoData[key],
-            };
-            if (key != "total") {
-                result.push(item);
+        } else {
+            let info = dayDocSnap.data();
+            setTotal(info["total"]);
+            let result = [];
+            for (const key in info) {
+                const item = {
+                    type: key,
+                    servings: info[key],
+                };
+                if (key != "total") {
+                    result.push(item);
+                }
             }
+            setFoodItems(result);
         }
-        setFoodItems(result);
-
         setCurrDate(date);
         hideDatePicker();
     };
@@ -211,22 +209,21 @@ const DietScreen = ({ navigation }) => {
         // SEE IF TODAY IS IN DB
         if (!dayDocSnap.exists()) {
             await setDoc(dayDocRef, { total: 0 });
-        }
-
-        let info = await getDoc(dayDocRef);
-        let infoData = info.data();
-
-        let result = [];
-        for (const key in infoData) {
-            const item = {
-                type: key,
-                servings: infoData[key],
-            };
-            if (key != "total") {
-                result.push(item);
+        } else {
+            let info = dayDocSnap.data();
+            setTotal(info["total"]);
+            let result = [];
+            for (const key in info) {
+                const item = {
+                    type: key,
+                    servings: info[key],
+                };
+                if (key != "total") {
+                    result.push(item);
+                }
             }
+            setFoodItems(result);
         }
-        setFoodItems(result);
     }, []);
 
     const screenHeight = Dimensions.get("screen").height - 80;
@@ -271,14 +268,14 @@ const DietScreen = ({ navigation }) => {
                 </TouchableOpacity>
                 <View style={{ marginTop: 20 }}>
                     <ProgressCircle
-                        percent={30}
+                        percent={(total / 6220) * 100}
                         radius={100}
                         borderWidth={15}
                         color={colours.secondary}
                         shadowColor={colours.pale}
                         bgColor={colours.white}
                     >
-                        <Text style={{ fontSize: 20 }}>{"30%"}</Text>
+                        <Text style={{ fontSize: 20 }}>{total} / 6220</Text>
                     </ProgressCircle>
                 </View>
                 <Text
@@ -298,7 +295,7 @@ const DietScreen = ({ navigation }) => {
                     style={{ width: "100%" }}
                     showsHorizontalScrollIndicator={false}
                 >
-                    {Object.keys(dietAmount2).map((item) => (
+                    {Object.keys(dietAmount).map((item) => (
                         <TouchableOpacity>
                             <View
                                 style={{
@@ -333,7 +330,7 @@ const DietScreen = ({ navigation }) => {
                                         borderColor: colours.white,
                                         borderWidth: 6,
                                     }}
-                                    source={dietAmount2[item][0]}
+                                    source={dietAmount[item][0]}
                                 ></Image>
                                 <View
                                     style={{
@@ -365,7 +362,7 @@ const DietScreen = ({ navigation }) => {
                                             color: colours.main,
                                         }}
                                     >
-                                        {dietAmount2[item][1]} g
+                                        {dietAmount[item][1]} g
                                     </Text>
                                 </View>
                             </View>

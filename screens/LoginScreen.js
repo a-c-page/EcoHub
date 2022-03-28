@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useContext } from "react";
 import {
-    KeyboardAvoidingView,
+    Image,
     StyleSheet,
     Text,
     TextInput,
@@ -14,18 +14,18 @@ import {
     signInWithEmailAndPassword,
     onAuthStateChanged,
 } from "firebase/auth";
-import { doc, setDoc, getFirestore } from "firebase/firestore";
+import { doc, setDoc, getFirestore, getDoc } from "firebase/firestore";
 import { StateContext } from "./StateProvider";
+import colours from "../styles/Colours";
 
 const LoginScreen = ({ navigation }) => {
-    const { userID, setUserID } = useContext(StateContext);
+    const { setUserID } = useContext(StateContext);
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const auth = getAuth(app);
     const db = getFirestore(app);
-
-    useEffect(() => {
-        onAuthStateChanged(auth, (user) => {
+    useEffect(async () => {
+        onAuthStateChanged(auth, async (user) => {
             if (user) {
                 setUserID(user.uid);
                 console.log("Logged in with UID: " + user.uid);
@@ -50,46 +50,102 @@ const LoginScreen = ({ navigation }) => {
             .then((userCredentials) => {
                 const user = userCredentials.user;
                 console.log("Logged in with: ", user.email);
-                navigation.navigate("Start");
             })
             .catch((error) => alert(error.message));
     };
 
     return (
-        <KeyboardAvoidingView
-            style={styles.container}
-            behavior={Platform.OS === "ios" ? "padding" : "height"}
-        >
+        <View style={styles.container}>
+            <Image
+                style={{
+                    width: 300,
+                    resizeMode: "contain",
+                }}
+                source={require("../assets/EcoPal.png")}
+            ></Image>
             <View style={styles.inputContainer}>
                 <TextInput
-                    placeholder="Email"
+                    placeholder="john.appleseed@apple.com"
+                    placeholderTextColor={colours.darkGrey}
                     value={email}
                     onChangeText={(text) => setEmail(text)}
                     style={styles.input}
+                    keyboardType={"email-address"}
+                    returnKeyType={"next"}
                 />
 
                 <TextInput
-                    placeholder="Password"
+                    placeholder="●●●●●●●●"
+                    placeholderTextColor={colours.darkGrey}
                     value={password}
                     onChangeText={(text) => setPassword(text)}
                     style={styles.input}
+                    returnKeyType={"done"}
                     secureTextEntry
                 />
-            </View>
 
-            <View style={styles.buttonContainer}>
-                <TouchableOpacity onPress={handleLogin} style={styles.button}>
-                    <Text style={styles.buttonText}>Login</Text>
+                <TouchableOpacity
+                    style={{
+                        height: 50,
+                        alignContent: "center",
+                        justifyContent: "center",
+                        alignSelf: "center",
+                        marginBottom: 30,
+                    }}
+                >
+                    <Text
+                        style={{
+                            fontSize: 16,
+                            color: colours.darkGrey,
+                        }}
+                    >
+                        Forgot Password
+                    </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
-                    onPress={handleSignUp}
-                    style={[styles.button, styles.buttonOutline]}
+                    onPress={handleLogin}
+                    style={{
+                        height: 70,
+                        backgroundColor: colours.secondary,
+                        paddingHorizontal: 25,
+                        borderRadius: 100,
+                        marginVertical: 8,
+                        justifyContent: "center",
+                        alignItems: "center",
+                    }}
                 >
-                    <Text style={styles.buttonOutlineText}>Register</Text>
+                    <Text style={styles.buttonText}>LOGIN</Text>
                 </TouchableOpacity>
             </View>
-        </KeyboardAvoidingView>
+
+            <TouchableOpacity
+                onPress={handleSignUp}
+                style={{
+                    height: 50,
+                    alignContent: "center",
+                    justifyContent: "center",
+                    alignSelf: "center",
+                    marginTop: 10,
+                }}
+            >
+                <Text
+                    style={{
+                        fontSize: 16,
+                        color: colours.darkGrey,
+                    }}
+                >
+                    Don't have an account?{" "}
+                    <Text
+                        style={{
+                            color: colours.secondary,
+                        }}
+                    >
+                        Sign Up!
+                    </Text>
+                </Text>
+            </TouchableOpacity>
+        </View>
     );
 };
 
@@ -103,15 +159,15 @@ const styles = StyleSheet.create({
 
     inputContainer: {
         width: "80%",
-        marginTop: 125,
+        marginTop: -50,
     },
 
     input: {
+        height: 70,
         backgroundColor: "white",
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        borderRadius: 10,
-        marginTop: 5,
+        paddingHorizontal: 25,
+        borderRadius: 100,
+        marginVertical: 8,
     },
 
     buttonContainer: {
@@ -131,8 +187,8 @@ const styles = StyleSheet.create({
 
     buttonText: {
         color: "white",
-        fontWeight: "700",
-        fontSize: 16,
+        fontWeight: "500",
+        fontSize: 20,
     },
 
     buttonOutline: {
