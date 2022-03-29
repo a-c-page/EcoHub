@@ -1,5 +1,5 @@
 const server = {
-    base: "http://192.168.129.177:8000/",
+    base: "http://192.168.16.177:8000/",
 
     // LIGHTS //
     turnOnLight: (room, status) => `setLight/${room}/${status}/`,
