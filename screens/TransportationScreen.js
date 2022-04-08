@@ -104,24 +104,38 @@ const TransportationScreen = ({ navigation }) => {
                 km: kmTravelled,
             };
 
-            let result = transportAmount[item.type][1] * item.km;
-            setTotal(total + result);
+            let found = false;
+            transportItems.forEach((itemIn) => {
+                if (itemIn.type == item.type) {
+                    found = true;
+                }
+            });
 
-            docData["total"] = increment(result);
+            if (!found) {
+                let result = transportAmount[item.type][1] * item.km;
+                setTotal(total + result);
 
-            const dayDocRef = doc(
-                db,
-                `userInfo/${userID}/transportTotals`,
-                dateString
-            );
-            await updateDoc(dayDocRef, docData);
+                docData["total"] = increment(result);
 
-            setTransportItems((transportItems) => [...transportItems, item]);
+                const dayDocRef = doc(
+                    db,
+                    `userInfo/${userID}/transportTotals`,
+                    dateString
+                );
+                await updateDoc(dayDocRef, docData);
 
-            toggleOverlay();
-            setKmTravelled(0);
-            setValue(null);
-            toggleOverlay();
+                setTransportItems((transportItems) => [
+                    ...transportItems,
+                    item,
+                ]);
+
+                toggleOverlay();
+                setKmTravelled(0);
+                setValue(null);
+                toggleOverlay();
+            } else {
+                alert("Item already added");
+            }
         } else if (value == null) {
             alert("Please select an item");
         } else if (kmTravelled == 0) {
@@ -178,6 +192,7 @@ const TransportationScreen = ({ navigation }) => {
         // SEE IF TODAY IS IN DB
         if (!dayDocSnap.exists()) {
             await setDoc(dayDocRef, { total: 0 });
+            setTotal(0);
         } else {
             let info = dayDocSnap.data();
             setTotal(info["total"]);

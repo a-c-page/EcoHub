@@ -4,7 +4,7 @@ const dietAmount = {
     Beef: [require("../assets/beef-min.jpg"), 7461],
     Chocolate: [require("../assets/chocolate-min.jpg"), 1400],
     Lamb: [require("../assets/lamb-min.jpg"), 2979],
-    Coffee: [require("../assets/coffee-min.jpg"), 4993],
+    Coffee: [require("../assets/coffee-min.jpg"), 60],
     Shellfish: [require("../assets/shellfish-min.jpg"), 2015],
     Dairy: [require("../assets/dairy-min.jpg"), 1194],
     Fish: [require("../assets/fish-min.jpg"), 1022],

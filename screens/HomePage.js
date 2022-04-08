@@ -76,7 +76,7 @@ const HomeDisplay = ({ navigation }) => {
         let len = array.length;
         let index;
         for (let i = 0; i < len; i++) {
-            if (array[i].type == val) {
+            if (array[i] == val) {
                 index = i;
             }
         }
@@ -86,7 +86,7 @@ const HomeDisplay = ({ navigation }) => {
     };
 
     const handleDelete = async (item) => {
-        let arr = remove(recos, item.id);
+        let arr = remove(recos, item);
         setRecos(arr);
 
         //Removing it from database
@@ -104,6 +104,7 @@ const HomeDisplay = ({ navigation }) => {
     const closePanel = () => {
         setIsPanelActive(false);
     };
+
     useEffect(async () => {
         const recoDocRef = doc(db, "recommendations", userID);
         const recoDocSnap = await getDoc(recoDocRef);
@@ -141,8 +142,15 @@ const HomeDisplay = ({ navigation }) => {
                     onPress={openPanel}
                 >
                     <MaterialCommunityIcons
+                        style={{
+                            shadowColor: bellColour,
+                            shadowOffset: { width: -2, height: 2 },
+                            shadowOpacity:
+                                bellColour == colours.secondary ? 0 : 1,
+                            shadowRadius: 3,
+                        }}
                         name="bell-circle-outline"
-                        color={bellColour}
+                        color={colours.secondary}
                         size={30}
                     />
                 </TouchableOpacity>

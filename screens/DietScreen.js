@@ -113,24 +113,35 @@ const DietScreen = ({ navigation }) => {
                 servings: serving,
             };
 
-            let result = dietAmount[item.type][1] * item.servings;
-            setTotal(total + result);
+            let found = false;
+            foodItems.forEach((itemIn) => {
+                if (itemIn.type == item.type) {
+                    found = true;
+                }
+            });
 
-            docData["total"] = increment(result);
+            if (!found) {
+                let result = dietAmount[item.type][1] * item.servings;
+                setTotal(total + result);
 
-            const dayDocRef = doc(
-                db,
-                `userInfo/${userID}/dietTotals`,
-                dateString
-            );
-            await updateDoc(dayDocRef, docData);
+                docData["total"] = increment(result);
 
-            setFoodItems((foodItems) => [...foodItems, item]);
+                const dayDocRef = doc(
+                    db,
+                    `userInfo/${userID}/dietTotals`,
+                    dateString
+                );
+                await updateDoc(dayDocRef, docData);
 
-            toggleOverlay();
-            setServing(0);
-            setValue(null);
-            toggleOverlay();
+                setFoodItems((foodItems) => [...foodItems, item]);
+
+                toggleOverlay();
+                setServing(0);
+                setValue(null);
+                toggleOverlay();
+            } else {
+                alert("Item already added");
+            }
         } else if (value == null) {
             alert("Please select an item");
         } else if (serving == 0) {
@@ -180,6 +191,7 @@ const DietScreen = ({ navigation }) => {
         // SEE IF TODAY IS IN DB
         if (!dayDocSnap.exists()) {
             await setDoc(dayDocRef, { total: 0 });
+            setTotal(0);
         } else {
             let info = dayDocSnap.data();
             setTotal(info["total"]);
